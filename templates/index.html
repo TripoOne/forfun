@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER-FLASH LAN // NET TOOLSET</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+</head>
+<body>
+    <!-- Background Animation Layer -->
+    <canvas id="matrix-canvas"></canvas>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>CYBER<span>FLASH</span></h1>
+                <p style="font-size: 0.6rem; color: var(--text-dim); letter-spacing: 1px;">LAN PROTOCOL // v2.0</p>
+            </div>
+            <nav class="nav-links">
+                <button class="nav-btn active" data-tab="dashboard">
+                    SYSTEM_STATUS
+                </button>
+                <button class="nav-btn" data-tab="network">
+                    NET_DIAGNOSTICS
+                </button>
+                <button class="nav-btn" data-tab="chat">
+                    LAN_MESSENGER
+                </button>
+                <button class="nav-btn" data-tab="settings">
+                    CONFIG_CORE
+                </button>
+            </nav>
+            
+            <div style="margin-top: auto; padding-top: 1rem; border-top: 2px solid var(--border);">
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <span style="font-size: 0.6rem; color: var(--text-dim);">UP_LINK_ESTABLISHED</span>
+                    <span id="my-ip" style="font-size: 0.9rem; color: var(--secondary);">0.0.0.0</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Dashboard Tab -->
+            <section id="dashboard" class="tab-content active">
+                <header>
+                    <h2 class="cyber-header">SYSTEM CORE // OK</h2>
+                    <p>> AUTH_LEVEL: <span id="display-name" style="color: var(--primary)">UNAUTHORIZED</span></p>
+                </header>
+                
+                <div class="card-grid">
+                    <div class="card">
+                        <h3>IP_ENDPOINT</h3>
+                        <div class="value" id="local-ip-stat">0.0.0.0</div>
+                    </div>
+                    <div class="card">
+                        <h3>ADAPTER_LINKS</h3>
+                        <div class="value" id="interface-count">0</div>
+                    </div>
+                    <div class="card">
+                        <h3>PEER_NODES</h3>
+                        <div class="value" id="chat-user-count">0</div>
+                    </div>
+                </div>
+
+                <div class="section-box">
+                    <h3 class="section-title">NETWORK_INTERFACES</h3>
+                    <div id="interfaces-container" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <!-- Injected -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Network Tools Tab -->
+            <section id="network" class="tab-content">
+                <header>
+                    <h2>DIAG_SUITE // ENGAGED</h2>
+                </header>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <div class="section-box">
+                            <h3 class="section-title">ICMP_INTERROGATE (PING)</h3>
+                            <div class="input-group">
+                                <input type="text" id="ping-target" placeholder="TARGET_HOST">
+                                <button id="run-ping">EXECUTE</button>
+                            </div>
+                            <div id="ping-results" style="margin-top: 1.5rem;"></div>
+                        </div>
+
+                        <div class="section-box">
+                            <h3 class="section-title">PORT_SCANNER (TCP)</h3>
+                            <div class="input-group">
+                                <input type="text" id="port-scan-target" placeholder="HOST_NODE">
+                                <button id="run-port-scan">SCAN</button>
+                            </div>
+                            <div id="port-scan-results" style="margin-top: 1.5rem;"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="section-box">
+                            <h3 class="section-title">DNS_RESOLVER</h3>
+                            <div class="input-group">
+                                <input type="text" id="dns-target" placeholder="DOMAIN_ALIAS">
+                                <button id="run-dns-lookup">RESOLVE</button>
+                            </div>
+                            <div id="dns-results" style="margin-top: 1.5rem;"></div>
+                        </div>
+
+                        <div class="section-box">
+                            <h3 class="section-title">NODE_SWEEP (LAN)</h3>
+                            <button id="run-lan-scan" style="width: 100%;">START_NET_SWEEP</button>
+                            <div id="lan-scan-results" style="margin-top: 1.5rem; max-height: 250px; overflow-y: auto;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-box">
+                    <h3 class="section-title">VOX_TRACE (TRACEROUTE)</h3>
+                    <div class="input-group">
+                        <input type="text" id="trace-target" placeholder="DEST_NODE">
+                        <button id="run-trace">TRACE</button>
+                    </div>
+                    <div id="trace-results" class="terminal-box mt-4" style="display: none; height: 180px;"></div>
+                </div>
+            </section>
+
+            <!-- Chat Tab -->
+            <section id="chat" class="tab-content">
+                <header>
+                    <h2>ENC_COMMUNICATION</h2>
+                </header>
+
+                <div class="chat-container">
+                    <div class="chat-box">
+                        <div id="chat-messages" class="messages-list"></div>
+                        <div class="chat-footer">
+                            <div class="input-group">
+                                <input type="text" id="chat-msg-input" placeholder="ENCRYPT_MSG.exe">
+                                <button id="send-chat" style="border-color: var(--secondary); color: var(--secondary);">ENCRYPT</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="user-sidebar">
+                        <h3 class="section-title" style="font-size: 1rem;">ACTIVE_AGENTS</h3>
+                        <div id="online-users-list" class="online-list"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Tab -->
+            <section id="settings" class="tab-content">
+                <header>
+                    <h2>CORE_OVERRIDE</h2>
+                </header>
+                <div class="section-box" style="max-width: 600px;">
+                    <h3 class="section-title">AGENT_IDENTIFICATION</h3>
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <div>
+                            <label style="display: block; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.5rem; text-transform: uppercase;">Set Agent Alias</label>
+                            <input type="text" id="username-setting" placeholder="NEW_ALIAS_ID">
+                        </div>
+                        <button id="save-settings">UPDATE_SYSTEM_ID</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Live System Console -->
+    <div id="system-console">
+        <div style="border-bottom: 1px solid var(--border); margin-bottom: 5px; font-weight: bold; color: var(--secondary);">SYS_LOG_TERMINAL</div>
+        <div id="console-output">
+            [SYS] BOOT_PROTOCOL initiated...<br>
+            [SYS] Web interface running at 0.0.0.0:5000<br>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="setup-overlay" class="modal-overlay">
+        <div class="modal">
+            <h2 style="color: var(--primary)">SYSTEM // AUTH</h2>
+            <p>ENTER AGENT IDENTIFIER TO PROCEED</p>
+            <input type="text" id="initial-username" placeholder="AGENT_ID..." style="margin-bottom: 1.5rem; text-align: center; border-color: var(--primary);">
+            <button id="start-app" style="width: 100%;">ACCESS_GRANTED</button>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
