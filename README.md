@@ -1,53 +1,59 @@
-# ⚡ CYBER-FLASH LAN TOOLSET // v2.0
+# ⚡ CYBER-FLASH // ULTIMATE LAN TOOLSET
+> **V3.0 // PREMIUM EDITION**
+> *Portable, Powerful, and Visually Stunning.*
 
-A portable, pocket-sized network utility suite with a "Cyber-Hacker" aesthetic. Designed to run from a bootable flash drive for on-the-go network diagnostics and secure LAN communication.
-
-## 🚀 Features
-- **Matrix-UI**: Real-time digital rain background with neon green/cyan HUD.
-- **Diagnostics**: Ping, Traceroute, Port Scanner, LAN Sweep, DNS Lookup.
-- **Secure Messenger**: Real-time SocketIO chat with persistent identity.
-- **Live Logs**: Dedicated terminal window for system activity.
-- **uv Managed**: Blazing fast environment setup and execution.
+**Cyber-Flash** is a state-of-the-art, pocket-sized network utility suite designed for operatives, network admins, and enthusiasts. Built with a high-end "Cyberpunk" aesthetic, it transforms any flash drive into a mobile command center for LAN diagnostics, security monitoring, and encrypted file sharing.
 
 ---
 
-## 🛠️ Bootable Flash Drive Setup (Linux)
+## 🌟 Premium Features
 
-To use this toolset on a portable drive, follow these steps:
+### 📂 GHOST_SHARE (The Vault)
+*   **Zero-Config P2P**: Share files between any device on the LAN without internet or complex setup.
+*   **Encrypted Storage**: Uses the `shared_vault` on your flash drive as a central repository.
+*   **Real-time Alerts**: Global notifications for all connected agents when new objects are shared.
 
-### 1. Create a Live Linux USB
-- Download **Ubuntu Desktop** or **Kali Linux** ISO.
-- Use **Rufus** (Windows) or **BalenaEtcher** (Cross-platform).
-- **CRITICAL**: In Rufus, set a **Persistence partition size** (at least 2-4GB) to save your toolset and settings.
+### 🛡️ SENTINEL_MODE (Security)
+*   **Port Trap**: Opens a stealth listener on **Port 9999**.
+*   **Intruder Logging**: Automatically detects and logs unauthorized network probes or scans.
+*   **Visual HUD Alerts**: Flashing red LED and system logs for immediate threat awareness.
 
-### 2. Prepare the Drive
-- Boot into the Live Linux environment from your USB.
-- Copy this `flash/` project folder into your home directory or onto the persistent partition.
+### ⚡ PULSE_GAUGE (Performance)
+*   **High-End HUD**: Animated SVG gauge for real-time bandwidth diagnostics.
+*   **CDN Testing**: Measures live Mbps using high-speed distributed nodes.
+*   **Smooth Motion**: Professional easing animations for a "SaaS-grade" feel.
 
-### 3. Run Automated Setup
-Open a terminal inside the project folder and run:
-```bash
-chmod +x setup_flash.sh start_app.sh
-./setup_flash.sh
-```
-This script will:
-- Install Python and networking system tools.
-- Install the `uv` package manager.
-- Create a `cyberflash.service` to auto-start the app on future boots.
+### 🛌 WAKE_ON_LAN (Remote Boot)
+*   **Magic Packets**: Power on sleeping PCs directly from your dashboard.
+*   **MAC Auto-Discovery**: Automatically resolves hardware addresses using ARP during network sweeps.
 
-### 4. Direct Execution
-If you don't want to install it as a service, just run:
-```bash
-./start_app.sh
-```
-Access the UI at `http://localhost:5000`.
+### 🎨 NEON_CORE (Visual Overrides)
+*   Switch between **Matrix Green**, **Cyberpunk Pink**, **Deep Sea Blue**, and **Ghost Protocol** themes instantly.
 
 ---
 
-## 💻 Local Development (Windows/macOS)
-If running locally for testing:
-1. Install [uv](https://astral.sh/uv).
-2. Run: `uv run python app.py`
+## 🛠️ Portable Deployment
 
-## ⚖️ Disclaimer
-This toolset is designed for **authorized network diagnostics and educational purposes only**. Always ensure you have permission before scanning or interacting with networks you do not own.
+### 🪟 Windows (Portable Mode)
+1.  Navigate to `CyberFlash/`.
+2.  Run `run_on_windows.bat`.
+3.  Access via `http://localhost:5000`.
+
+### 🐧 Linux (Live USB / Kali / Ubuntu)
+1.  Open a terminal in the `CyberFlash/` directory.
+2.  Run `bash setup_flash.sh`.
+3.  The system will install dependencies and configure an auto-start service.
+
+### 🚀 Making it "Direct Boot"
+Pair this toolset with **Ventoy** or **Rufus** by installing a lightweight Linux ISO (like Alpine or Debian) and setting up persistence.
+
+---
+
+## 💻 Technical Stack
+- **Core**: Python 3.12+ // Flask // SocketIO
+- **Async Engine**: Eventlet (High-Performance Sockets)
+- **Environment**: `uv` managed for sub-second startup
+- **Frontend**: Vanilla JS // CSS3 // SVG Animations
+
+---
+*DEVELOPED BY ANTIGRAVITY CORE*

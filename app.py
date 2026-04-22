@@ -1,12 +1,24 @@
-from flask import Flask, render_template, request, jsonify
-from flask_socketio import SocketIO, emit
+import warnings
+warnings.simplefilter("ignore")
+
 import eventlet
+eventlet.monkey_patch()
+
+from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask_socketio import SocketIO, emit
 import network_utils
 import time
 import threading
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'flash-lan-tool-secret'
+app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'shared_vault')
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB limit
+
+# Ensure vault exists
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 # Store connected users
@@ -15,6 +27,44 @@ users = {}
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/api/share/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+    
+    filename = secure_filename(file.filename)
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(file_path)
+    
+    # Notify everyone via SocketIO
+    socketio.emit('new_file', {
+        'filename': filename,
+        'size': os.path.getsize(file_path),
+        'timestamp': time.strftime('%H:%M:%S')
+    })
+    
+    return jsonify({"message": "File uploaded successfully", "filename": filename})
+
+@app.route('/api/share/files')
+def list_files():
+    files = []
+    for filename in os.listdir(app.config['UPLOAD_FOLDER']):
+        path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        if os.path.isfile(path):
+            files.append({
+                'filename': filename,
+                'size': os.path.getsize(path),
+                'timestamp': time.ctime(os.path.getmtime(path))
+            })
+    return jsonify(files)
+
+@app.route('/api/share/download/<filename>')
+def download_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route('/api/network/interfaces')
 def get_interfaces():
@@ -44,13 +94,56 @@ def run_lan_scan():
         prefix = '.'.join(local_ip.split('.')[:-1])
     
     hosts = network_utils.scan_lan(prefix)
-    return jsonify({"prefix": prefix, "active_hosts": hosts})
+    # Enrich with MAC addresses and Vendor names
+    enriched_hosts = []
+    for ip in hosts:
+        mac = network_utils.get_mac_address(ip)
+        enriched_hosts.append({
+            "ip": ip,
+            "mac": mac,
+            "vendor": network_utils.get_vendor_name(mac)
+        })
+    return jsonify({"prefix": prefix, "active_hosts": enriched_hosts})
+
+@app.route('/api/network/qr')
+def get_qr_code():
+    import qrcode
+    import io
+    import base64
+    
+    local_ip = network_utils.get_local_ip()
+    url = f"http://{local_ip}:5000"
+    
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(url)
+    qr.make(fit=True)
+    
+    img = qr.make_image(fill_color="black", back_color="white")
+    buffered = io.BytesIO()
+    img.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode()
+    
+    return jsonify({"url": url, "qr_image": img_str})
+
+@app.route('/api/network/wake', methods=['POST'])
+def run_wake():
+    data = request.json
+    mac = data.get('mac')
+    if not mac:
+        return jsonify({"error": "No MAC address provided"}), 400
+    result = network_utils.send_wol_packet(mac)
+    return jsonify(result)
 
 @app.route('/api/network/dns-lookup', methods=['POST'])
 def run_dns_lookup():
     data = request.json
     domain = data.get('domain')
     result = network_utils.dns_lookup(domain)
+    return jsonify(result)
+
+@app.route('/api/network/speed-test')
+def run_speed_test():
+    result = network_utils.measure_speed()
     return jsonify(result)
 
 @socketio.on('connect')
@@ -96,8 +189,54 @@ def handle_traceroute(data):
     
     eventlet.spawn(run_trace)
 
+# Sentinel Mode (Security Trap)
+sentinel_active = False
+sentinel_logs = []
+
+def sentinel_listener(port=9999):
+    global sentinel_active
+    import socket
+    
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    
+    try:
+        server.bind(('0.0.0.0', port))
+        server.listen(5)
+        sentinel_active = True
+        print(f" [SENTINEL] Security trap active on port {port}")
+        
+        while sentinel_active:
+            client, addr = server.accept()
+            ip = addr[0]
+            log_entry = {
+                'ip': ip,
+                'timestamp': time.strftime('%H:%M:%S'),
+                'event': 'PORT_PROBE_DETECTED'
+            }
+            sentinel_logs.append(log_entry)
+            socketio.emit('sentinel_alert', log_entry)
+            client.close()
+    except Exception as e:
+        print(f" [SENTINEL] Error: {e}")
+        sentinel_active = False
+    finally:
+        server.close()
+
+@app.route('/api/sentinel/status')
+def get_sentinel_status():
+    return jsonify({
+        "active": sentinel_active,
+        "port": 9999,
+        "logs": sentinel_logs[-10:] # Last 10 logs
+    })
+
 if __name__ == '__main__':
+    # Start Sentinel in background
+    eventlet.spawn(sentinel_listener)
+    
     # Get local IP to show user where to connect
     local_ip = network_utils.get_local_ip()
     print(f" * Flash LAN Toolset running on http://{local_ip}:5000")
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    print(" * PORT 5000 OPENED. AWAITING CONNECTIONS...")
+    socketio.run(app, host='0.0.0.0', port=5000, debug=False)

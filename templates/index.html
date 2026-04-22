@@ -29,15 +29,33 @@
                 <button class="nav-btn" data-tab="chat">
                     LAN_MESSENGER
                 </button>
+                <button class="nav-btn" data-tab="vault">
+                    CORE_VAULT
+                </button>
+                <button class="nav-btn" data-tab="topology">
+                    VOID_GRAPH
+                </button>
+                <button class="nav-btn" data-tab="globe">
+                    WORLD_SCAN
+                </button>
                 <button class="nav-btn" data-tab="settings">
                     CONFIG_CORE
                 </button>
             </nav>
             
             <div style="margin-top: auto; padding-top: 1rem; border-top: 2px solid var(--border);">
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div id="sentinel-led" style="width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); box-shadow: 0 0 5px var(--text-dim);"></div>
+                        <span style="font-size: 0.65rem; color: var(--text-dim); letter-spacing: 1px;">SENTINEL_SHIELD</span>
+                    </div>
+                </div>
                 <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                     <span style="font-size: 0.6rem; color: var(--text-dim);">UP_LINK_ESTABLISHED</span>
-                    <span id="my-ip" style="font-size: 0.9rem; color: var(--secondary);">0.0.0.0</span>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span id="my-ip" style="font-size: 0.9rem; color: var(--secondary);">0.0.0.0</span>
+                        <button id="show-qr" style="padding: 2px 5px; font-size: 0.6rem; border-color: var(--secondary); color: var(--secondary);">QR</button>
+                    </div>
                 </div>
             </div>
         </aside>
@@ -63,6 +81,36 @@
                     <div class="card">
                         <h3>PEER_NODES</h3>
                         <div class="value" id="chat-user-count">0</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div class="section-box" style="display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+                        <h3 class="section-title" style="align-self: flex-start; margin-bottom: 1rem;">PULSE_GAUGE // NET_SPEED</h3>
+                        
+                        <div class="gauge-container" style="position: relative; width: 160px; height: 160px;">
+                            <svg viewBox="0 0 100 100" style="transform: rotate(-90deg);">
+                                <circle cx="50" cy="50" r="45" fill="none" stroke="var(--border)" stroke-width="8" />
+                                <circle id="speed-gauge-fill" cx="50" cy="50" r="45" fill="none" stroke="var(--primary)" stroke-width="8" 
+                                    stroke-dasharray="283" stroke-dashoffset="283" style="transition: stroke-dashoffset 1s ease-out; stroke-linecap: round;" />
+                            </svg>
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                                <div id="speed-value" style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">0.0</div>
+                                <div style="font-size: 0.5rem; color: var(--text-dim);">Mbps</div>
+                            </div>
+                        </div>
+                        
+                        <button id="run-speed-test" style="margin-top: 1rem; width: 100%; border-color: var(--primary); color: var(--primary);">INITIATE_PULSE</button>
+                    </div>
+
+                    <div class="section-box">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 class="section-title" style="margin-bottom: 0;">SENTINEL_MONITOR // PORT_9999</h3>
+                            <span id="sentinel-status-text" style="font-size: 0.6rem; color: var(--primary);">ACTIVE</span>
+                        </div>
+                        <div id="sentinel-logs" style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-dim); max-height: 150px; overflow-y: auto;">
+                            <p>[INFO] Sentinel trap initialized...</p>
+                        </div>
                     </div>
                 </div>
 
@@ -152,6 +200,80 @@
                 </div>
             </section>
 
+            <!-- Vault (Ghost Share) Tab -->
+            <section id="vault" class="tab-content">
+                <header>
+                    <h2>GHOST_SHARE // ENCRYPTED_VAULT</h2>
+                </header>
+
+                <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem;">
+                    <div>
+                        <div class="section-box" id="drop-zone">
+                            <h3 class="section-title">TRANSMIT_OBJECT</h3>
+                            <div style="border: 2px dashed var(--border); padding: 2rem; text-align: center; cursor: pointer;" id="upload-trigger">
+                                <p style="color: var(--text-dim);">DRAG_FILES_HERE or CLICK_TO_SELECT</p>
+                                <input type="file" id="file-input" style="display: none;">
+                            </div>
+                            <div id="upload-progress" style="margin-top: 1rem; display: none;">
+                                <div style="height: 4px; background: var(--border); width: 100%;">
+                                    <div id="progress-bar" style="height: 100%; background: var(--primary); width: 0%;"></div>
+                                </div>
+                                <p style="font-size: 0.7rem; color: var(--primary); margin-top: 5px;">UPLOADING...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="section-box">
+                            <h3 class="section-title">VAULT_INVENTORY</h3>
+                            <div id="vault-list" style="display: flex; flex-direction: column; gap: 0.8rem; max-height: 400px; overflow-y: auto;">
+                                <!-- Injected -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Topology (Void Graph) Tab -->
+            <section id="topology" class="tab-content">
+                <header>
+                    <h2>VOID_GRAPH // NETWORK_TOPOLOGY</h2>
+                </header>
+
+                <div class="section-box" style="height: 600px; padding: 0; position: relative; overflow: hidden; background: #000;">
+                    <div id="topology-controls" style="position: absolute; top: 20px; left: 20px; z-index: 10; display: flex; gap: 1rem;">
+                        <button id="refresh-topology" style="padding: 5px 15px; font-size: 0.7rem;">RESCAN_MAP</button>
+                        <span style="font-size: 0.7rem; color: var(--primary); align-self: center;" id="node-count-label">NODES_DETECTED: 0</span>
+                    </div>
+                    <canvas id="topology-canvas" style="width: 100%; height: 100%; cursor: crosshair;"></canvas>
+                    <div id="node-info-panel" style="position: absolute; bottom: 20px; right: 20px; width: 250px; background: rgba(0,0,0,0.8); border: 1px solid var(--primary); padding: 1rem; font-size: 0.75rem; display: none;">
+                        <h4 style="color: var(--primary); border-bottom: 1px solid var(--primary); padding-bottom: 5px; margin-bottom: 5px;">NODE_INTEL</h4>
+                        <div id="node-details"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Globe (World Scan) Tab -->
+            <section id="globe" class="tab-content">
+                <header>
+                    <h2>WORLD_SCAN // GEO_INTELLIGENCE</h2>
+                </header>
+
+                <div class="section-box" style="height: 600px; padding: 0; position: relative; overflow: hidden; background: #000; display: flex; justify-content: center; align-items: center;">
+                    <div style="position: absolute; top: 20px; left: 20px; z-index: 10;">
+                        <div class="input-group" style="margin-bottom: 1rem;">
+                            <input type="text" id="geo-target" placeholder="IP_OR_DOMAIN">
+                            <button id="run-geo-scan" style="padding: 5px 15px; font-size: 0.7rem;">GEO_LOCATE</button>
+                        </div>
+                        <div id="geo-results" style="font-size: 0.7rem; color: var(--primary);"></div>
+                    </div>
+                    <canvas id="globe-canvas" style="width: 100%; height: 100%; cursor: grab;"></canvas>
+                    <div style="position: absolute; bottom: 20px; right: 20px; color: var(--text-dim); font-size: 0.6rem; text-align: right;">
+                        GLOBAL_VECTOR_PROJECTION // [ 3D_WIRE_CORE ]
+                    </div>
+                </div>
+            </section>
+
             <!-- Settings Tab -->
             <section id="settings" class="tab-content">
                 <header>
@@ -165,6 +287,16 @@
                             <input type="text" id="username-setting" placeholder="NEW_ALIAS_ID">
                         </div>
                         <button id="save-settings">UPDATE_SYSTEM_ID</button>
+                    </div>
+                </div>
+
+                <div class="section-box" style="max-width: 600px;">
+                    <h3 class="section-title">VISUAL_OVERRIDE (THEMES)</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <button class="theme-btn active" data-theme="matrix" style="border-color: #00ff41; color: #00ff41;">MATRIX_CORE</button>
+                        <button class="theme-btn" data-theme="cyberpunk" style="border-color: #ff00ff; color: #ff00ff;">CYBER_PINK</button>
+                        <button class="theme-btn" data-theme="deep-sea" style="border-color: #00d4ff; color: #00d4ff;">DEEP_SEA</button>
+                        <button class="theme-btn" data-theme="ghost" style="border-color: #ffffff; color: #ffffff;">GHOST_PROTOCOL</button>
                     </div>
                 </div>
             </section>
@@ -191,5 +323,14 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <!-- QR Modal -->
+    <div id="qr-modal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; justify-content: center; align-items: center;">
+        <div class="modal" style="background: var(--bg-black); padding: 2rem; border: 2px solid var(--secondary); text-align: center; max-width: 400px; width: 90%;">
+            <h3 style="margin-bottom: 1rem; color: var(--secondary);">SIGNAL_TAP // QR_CONNECT</h3>
+            <img id="qr-img" src="" alt="QR Code" style="width: 200px; height: 200px; border: 4px solid #fff; margin-bottom: 1rem;">
+            <p id="qr-url" style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1.5rem; word-break: break-all;">http://0.0.0.0:5000</p>
+            <button id="close-qr" style="width: 100%; border-color: var(--secondary); color: var(--secondary);">DISCONNECT</button>
+        </div>
+    </div>
 </body>
 </html>

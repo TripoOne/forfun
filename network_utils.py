@@ -96,3 +96,106 @@ def dns_lookup(domain):
         return {"hostname": data[0], "aliases": data[1], "ips": data[2]}
     except Exception as e:
         return {"error": str(e)}
+
+def measure_speed():
+    """Measures download speed by downloading a small chunk from a CDN."""
+    import time
+    import urllib.request
+    import ssl
+    
+    # Create unverified SSL context to avoid certificate issues in portable environments
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    
+    # Fast CDNs for testing
+    urls = [
+        "https://speed.cloudflare.com/__down?bytes=5000000",
+        "https://fast.com" # Fallback (headers only usually)
+    ]
+    
+    start_time = time.time()
+    for test_url in urls:
+        try:
+            req = urllib.request.Request(test_url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req, timeout=8, context=ctx) as response:
+                _ = response.read()
+            end_time = time.time()
+            
+            duration = end_time - start_time
+            if duration <= 0: duration = 0.1
+            mbps = (5 * 8) / duration # (5MB * 8 bits) / duration
+            return {"mbps": round(mbps, 2), "duration": round(duration, 2)}
+        except Exception as e:
+            continue
+            
+    return {"error": "All speed test nodes unreachable. Check internet connection."}
+
+def send_wol_packet(mac_address):
+    """Sends a Wake-on-LAN magic packet to a MAC address."""
+    import socket
+    import struct
+
+    # Clean up mac address
+    mac_address = mac_address.replace(':', '').replace('-', '')
+    if len(mac_address) != 12:
+        return {"error": "Invalid MAC address format"}
+
+    # Create magic packet: 6 bytes of FF followed by 16 repetitions of MAC
+    data = bytes.fromhex('F' * 12 + mac_address * 16)
+    
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            s.sendto(data, ('255.255.255.255', 9))
+        return {"status": "Magic packet transmitted"}
+    except Exception as e:
+        return {"error": str(e)}
+
+def get_mac_address(ip):
+    """Attempts to find the MAC address for a given IP via ARP cache."""
+    import subprocess
+    import re
+    
+    cmd = ['arp', '-a', ip]
+    try:
+        output = subprocess.check_output(cmd, text=True, stderr=subprocess.STDOUT)
+        # Regex for MAC address
+        mac_match = re.search(r"([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})", output)
+        if mac_match:
+            return mac_match.group(0)
+    except Exception:
+        pass
+    return "UNKNOWN"
+
+def get_vendor_name(mac):
+    """Resolves MAC prefix to manufacturer name using a common OUI list."""
+    if mac == "UNKNOWN": return "GENERIC_NODE"
+    
+    # Common OUI Prefixes
+    vendors = {
+        "00:00:5E": "ICANN",
+        "00:03:93": "Apple",
+        "00:05:02": "Apple",
+        "00:0C:29": "VMware",
+        "00:15:5D": "Microsoft",
+        "00:1A:11": "Google",
+        "00:1C:42": "Parallels",
+        "00:25:90": "Supermicro",
+        "00:50:56": "VMware",
+        "08:00:27": "VirtualBox",
+        "28:D2:44": "Xiaomi",
+        "3C:D9:2B": "Hewlett Packard",
+        "40:8D:5C": "Apple",
+        "44:65:0D": "Amazon",
+        "50:65:F3": "Apple",
+        "70:35:60": "Apple",
+        "70:B3:D5": "IETF",
+        "B8:27:EB": "Raspberry Pi",
+        "DC:A6:32": "Raspberry Pi",
+        "E4:5F:01": "Raspberry Pi",
+        "FC:FB:FB": "Cisco",
+    }
+    
+    prefix = mac[:8].upper()
+    return vendors.get(prefix, "UNKNOWN_VENDOR")

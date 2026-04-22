@@ -13,6 +13,42 @@
     --font-mono: 'JetBrains Mono', 'Share Tech Mono', 'Courier New', monospace;
 }
 
+[data-theme="cyberpunk"] {
+    --primary: #ff00ff; /* Neon Pink */
+    --primary-glow: rgba(255, 0, 255, 0.5);
+    --secondary: #00f0ff; /* Electric Blue */
+    --secondary-glow: rgba(0, 240, 255, 0.4);
+    --bg-black: #0d0221; /* Deep Purple */
+    --card-bg: rgba(26, 4, 61, 0.9);
+    --text-main: #ff00ff;
+    --text-dim: #7d007d;
+    --border: #3c096c;
+}
+
+[data-theme="deep-sea"] {
+    --primary: #00d4ff; /* Sea Cyan */
+    --primary-glow: rgba(0, 212, 255, 0.5);
+    --secondary: #0077b6; /* Deep Blue */
+    --secondary-glow: rgba(0, 119, 182, 0.4);
+    --bg-black: #03045e; /* Navy */
+    --card-bg: rgba(2, 62, 138, 0.9);
+    --text-main: #90e0ef;
+    --text-dim: #00b4d8;
+    --border: #0077b6;
+}
+
+[data-theme="ghost"] {
+    --primary: #ffffff; /* Pure White */
+    --primary-glow: rgba(255, 255, 255, 0.3);
+    --secondary: #a8a8a8; /* Gray */
+    --secondary-glow: rgba(168, 168, 168, 0.2);
+    --bg-black: #121212;
+    --card-bg: rgba(30, 30, 30, 0.9);
+    --text-main: #ffffff;
+    --text-dim: #7a7a7a;
+    --border: #333333;
+}
+
 * {
     margin: 0;
     padding: 0;
