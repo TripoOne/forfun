@@ -159,6 +159,8 @@ def run_sys_diag(command):
         output = network_utils.get_routing_table()
     elif command == 'wifi':
         output = network_utils.get_wifi_info()
+    elif command == 'wifi_keys':
+        output = network_utils.get_wifi_passwords()
     elif command == 'nbtstat':
         output = network_utils.get_nbtstat()
     elif command == 'hostname':

