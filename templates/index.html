@@ -175,6 +175,24 @@
                     </div>
                     <div id="trace-results" class="terminal-box mt-4" style="display: none; height: 180px;"></div>
                 </div>
+
+                <div class="section-box">
+                    <h3 class="section-title">SYSTEM_CONSOLE // ADV_DIAG</h3>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                        <button class="diag-btn" data-cmd="ipconfig" style="flex: 1; min-width: 120px;">IP_CONFIG</button>
+                        <button class="diag-btn" data-cmd="netstat" style="flex: 1; min-width: 120px;">NET_STAT</button>
+                        <button class="diag-btn" data-cmd="arp" style="flex: 1; min-width: 120px;">ARP_TABLE</button>
+                        <button class="diag-btn" data-cmd="route" style="flex: 1; min-width: 120px;">ROUTE_MAP</button>
+                        <button class="diag-btn" data-cmd="wifi" style="flex: 1; min-width: 120px;">WIFI_INTEL</button>
+                        <button class="diag-btn" data-cmd="nbtstat" style="flex: 1; min-width: 120px;">NBT_STAT</button>
+                        <button class="diag-btn" data-cmd="hostname" style="flex: 1; min-width: 120px;">HOST_ID</button>
+                    </div>
+                    <div class="input-group" style="margin-bottom: 1rem;">
+                        <input type="text" id="custom-net-cmd" placeholder="MANUAL_OVERRIDE (e.g. nslookup google.com)">
+                        <button id="run-custom-cmd">EXECUTE_RAW</button>
+                    </div>
+                    <div id="sys-diag-results" class="terminal-box" style="display: none; height: 300px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.4); border: 1px solid var(--border); padding: 1rem; font-size: 0.75rem; color: var(--primary);"></div>
+                </div>
             </section>
 
             <!-- Chat Tab -->

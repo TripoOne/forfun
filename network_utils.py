@@ -199,3 +199,43 @@ def get_vendor_name(mac):
     
     prefix = mac[:8].upper()
     return vendors.get(prefix, "UNKNOWN_VENDOR")
+
+def run_system_command(cmd):
+    """Executes a system command and returns the output."""
+    try:
+        output = subprocess.check_output(cmd, shell=True, text=True, stderr=subprocess.STDOUT)
+        return output
+    except Exception as e:
+        return f"Error executing command: {str(e)}"
+
+def get_detailed_config():
+    """Returns detailed ipconfig /all output."""
+    return run_system_command("ipconfig /all" if platform.system().lower() == "windows" else "ifconfig -a")
+
+def get_netstat_info():
+    """Returns active network connections."""
+    return run_system_command("netstat -ano" if platform.system().lower() == "windows" else "netstat -tulnp")
+
+def get_arp_cache():
+    """Returns the full ARP table."""
+    return run_system_command("arp -a")
+
+def get_routing_table():
+    """Returns the system routing table."""
+    return run_system_command("route print" if platform.system().lower() == "windows" else "netstat -rn")
+
+def get_wifi_info():
+    """Returns WiFi interface details and saved profiles."""
+    if platform.system().lower() == "windows":
+        return run_system_command("netsh wlan show interfaces && netsh wlan show profiles")
+    return "WiFi diagnostics only supported on Windows."
+
+def get_nbtstat():
+    """Returns NetBIOS statistics."""
+    if platform.system().lower() == "windows":
+        return run_system_command("nbtstat -n && nbtstat -c")
+    return "Nbtstat only supported on Windows."
+
+def get_hostname_info():
+    """Returns system hostname and basic OS info."""
+    return f"HOSTNAME: {socket.gethostname()}\nOS: {platform.system()} {platform.release()}\nARCH: {platform.machine()}"

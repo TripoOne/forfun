@@ -112,7 +112,8 @@ def get_qr_code():
     import base64
     
     local_ip = network_utils.get_local_ip()
-    url = f"http://{local_ip}:5000"
+    port = app.config.get('RUNNING_PORT', 5000)
+    url = f"http://{local_ip}:{port}"
     
     qr = qrcode.QRCode(version=1, box_size=10, border=5)
     qr.add_data(url)
@@ -145,6 +146,45 @@ def run_dns_lookup():
 def run_speed_test():
     result = network_utils.measure_speed()
     return jsonify(result)
+
+@app.route('/api/network/sys-diag/<command>')
+def run_sys_diag(command):
+    if command == 'ipconfig':
+        output = network_utils.get_detailed_config()
+    elif command == 'netstat':
+        output = network_utils.get_netstat_info()
+    elif command == 'arp':
+        output = network_utils.get_arp_cache()
+    elif command == 'route':
+        output = network_utils.get_routing_table()
+    elif command == 'wifi':
+        output = network_utils.get_wifi_info()
+    elif command == 'nbtstat':
+        output = network_utils.get_nbtstat()
+    elif command == 'hostname':
+        output = network_utils.get_hostname_info()
+    else:
+        return jsonify({"error": "Invalid command"}), 400
+    
+    return jsonify({"command": command, "output": output})
+
+@app.route('/api/network/custom-diag', methods=['POST'])
+def run_custom_diag():
+    data = request.json
+    raw_cmd = data.get('command', '').strip()
+    
+    if not raw_cmd:
+        return jsonify({"error": "Empty command"}), 400
+        
+    # Whitelist of allowed base commands
+    whitelist = ['nslookup', 'nbtstat', 'netsh', 'ping', 'hostname', 'arp', 'net', 'ipconfig']
+    base_cmd = raw_cmd.split()[0].lower()
+    
+    if base_cmd not in whitelist:
+        return jsonify({"error": f"Command '{base_cmd}' is not in the authorized whitelist."}), 403
+    
+    output = network_utils.run_system_command(raw_cmd)
+    return jsonify({"command": raw_cmd, "output": output})
 
 @socketio.on('connect')
 def handle_connect():
@@ -235,8 +275,23 @@ if __name__ == '__main__':
     # Start Sentinel in background
     eventlet.spawn(sentinel_listener)
     
+    # Get port from environment or default to 5000
+    try:
+        port = int(os.environ.get('PORT', 5000))
+    except ValueError:
+        port = 5000
+    
     # Get local IP to show user where to connect
     local_ip = network_utils.get_local_ip()
-    print(f" * Flash LAN Toolset running on http://{local_ip}:5000")
-    print(" * PORT 5000 OPENED. AWAITING CONNECTIONS...")
-    socketio.run(app, host='0.0.0.0', port=5000, debug=False)
+    app.config['RUNNING_PORT'] = port
+    
+    print(f" * Flash LAN Toolset running on http://{local_ip}:{port}")
+    print(f" * PORT {port} OPENED. AWAITING CONNECTIONS...")
+    
+    try:
+        socketio.run(app, host='0.0.0.0', port=port, debug=False)
+    except Exception as e:
+        if "10048" in str(e) or "already in use" in str(e).lower():
+            print(f" [!] Port {port} is busy. Please try running the script again or check for other instances.")
+        else:
+            raise e

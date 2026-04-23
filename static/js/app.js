@@ -98,6 +98,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('run-lan-scan').addEventListener('click', runLanScan);
     document.getElementById('run-dns-lookup').addEventListener('click', runDnsLookup);
     document.getElementById('run-speed-test').addEventListener('click', runSpeedTest);
+    
+    // Advanced Diagnostics
+    document.querySelectorAll('.diag-btn').forEach(btn => {
+        btn.addEventListener('click', () => runSysDiag(btn.getAttribute('data-cmd')));
+    });
+    document.getElementById('run-custom-cmd').addEventListener('click', runCustomDiag);
+    document.getElementById('custom-net-cmd').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') runCustomDiag();
+    });
 
     // QR Connect
     document.getElementById('show-qr').addEventListener('click', showQR);
@@ -368,6 +377,66 @@ async function runDnsLookup() {
                 <div style="margin-top: 0.5rem; font-family: monospace;">ADDR: ${data.ips.join(', ')}</div>
             </div>
         `;
+    } catch (err) {
+        resultsDiv.innerHTML = `<p style="color: var(--danger)">ERROR: ${err.message}</p>`;
+    }
+}
+
+async function runSysDiag(cmd) {
+    const resultsDiv = document.getElementById('sys-diag-results');
+    resultsDiv.style.display = 'block';
+    resultsDiv.innerHTML = `<p style="color: var(--text-muted)">EXECUTING: ${cmd.toUpperCase()}...</p>`;
+    logSystem(`System Diagnostic: ${cmd.toUpperCase()}`);
+
+    try {
+        const res = await fetch(`/api/network/sys-diag/${cmd}`);
+        const data = await res.json();
+        
+        if (data.error) throw new Error(data.error);
+
+        // Convert newlines to <br> and spaces to &nbsp; for terminal look
+        const formatted = data.output
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/\n/g, '<br>')
+            .replace(/ /g, '&nbsp;');
+            
+        resultsDiv.innerHTML = `<div style="white-space: pre-wrap; font-family: 'JetBrains Mono', monospace;">${formatted}</div>`;
+        resultsDiv.scrollTop = 0; // Reset scroll to top of output
+    } catch (err) {
+        resultsDiv.innerHTML = `<p style="color: var(--danger)">ERROR: ${err.message}</p>`;
+    }
+}
+
+async function runCustomDiag() {
+    const cmd = document.getElementById('custom-net-cmd').value.trim();
+    if (!cmd) return;
+
+    const resultsDiv = document.getElementById('sys-diag-results');
+    resultsDiv.style.display = 'block';
+    resultsDiv.innerHTML = `<p style="color: var(--text-muted)">EXECUTING_MANUAL_OVERRIDE: ${cmd}...</p>`;
+    logSystem(`Manual Override: ${cmd}`);
+
+    try {
+        const res = await fetch('/api/network/custom-diag', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ command: cmd })
+        });
+        const data = await res.json();
+        
+        if (data.error) throw new Error(data.error);
+
+        const formatted = data.output
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/\n/g, '<br>')
+            .replace(/ /g, '&nbsp;');
+            
+        resultsDiv.innerHTML = `<div style="white-space: pre-wrap; font-family: 'JetBrains Mono', monospace;">${formatted}</div>`;
+        resultsDiv.scrollTop = 0;
     } catch (err) {
         resultsDiv.innerHTML = `<p style="color: var(--danger)">ERROR: ${err.message}</p>`;
     }
