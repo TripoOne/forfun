@@ -31,7 +31,14 @@ def perform_traceroute(host):
     command = ['tracert' if platform.system().lower() == 'windows' else 'traceroute', param, host]
     
     try:
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        process = subprocess.Popen(
+            command, 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.STDOUT, 
+            text=True, 
+            encoding='cp437', 
+            errors='replace'
+        )
         for line in iter(process.stdout.readline, ''):
             yield line
         process.stdout.close()
@@ -159,7 +166,13 @@ def get_mac_address(ip):
     
     cmd = ['arp', '-a', ip]
     try:
-        output = subprocess.check_output(cmd, text=True, stderr=subprocess.STDOUT)
+        output = subprocess.check_output(
+            cmd, 
+            text=True, 
+            stderr=subprocess.STDOUT, 
+            encoding='cp437', 
+            errors='replace'
+        )
         # Regex for MAC address
         mac_match = re.search(r"([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})", output)
         if mac_match:
@@ -203,7 +216,15 @@ def get_vendor_name(mac):
 def run_system_command(cmd):
     """Executes a system command and returns the output."""
     try:
-        output = subprocess.check_output(cmd, shell=True, text=True, stderr=subprocess.STDOUT)
+        # Use cp437 for Windows terminal output and errors='replace' to prevent crashes
+        output = subprocess.check_output(
+            cmd, 
+            shell=True, 
+            text=True, 
+            stderr=subprocess.STDOUT, 
+            encoding='cp437', 
+            errors='replace'
+        )
         return output
     except Exception as e:
         return f"Error executing command: {str(e)}"
