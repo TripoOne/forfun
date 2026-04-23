@@ -1,5 +1,7 @@
 @echo off
 title CYBER-FLASH // WINDOWS_PORTABLE
+setlocal enabledelayedexpansion
+
 echo :: INITIALIZING CYBER-FLASH CORE...
 echo :: CHECKING DEPENDENCIES...
 
@@ -10,8 +12,17 @@ if %errorlevel% neq 0 (
     exit /b
 )
 
-echo :: SYNCING ENVIRONMENT...
-pip install -r requirements.txt >nul 2>&1
+:: Create virtual environment on the flash drive if it doesn't exist
+if not exist ".venv" (
+    echo :: BUILDING PORTABLE_ENVIRONMENT (One-time setup)...
+    python -m venv .venv
+)
+
+echo :: ACTIVATING CORE...
+call .venv\Scripts\activate
+
+echo :: SYNCING MODULES...
+pip install -r requirements.txt --quiet
 
 echo :: LAUNCHING INTERFACE...
 python app.py
