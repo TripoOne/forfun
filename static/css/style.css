@@ -229,9 +229,9 @@ body::before {
     background: transparent;
     border: 1px solid var(--border);
     color: var(--text-dim);
-    padding: 1rem;
+    padding: 0.8rem 1rem;
     text-align: left;
-    font-size: 1rem;
+    font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.2s;
     text-transform: uppercase;
@@ -508,7 +508,18 @@ button:hover {
 }
 
 /* Modal */
-.modal-overlay { background: rgba(0,0,0,0.95); backdrop-filter: none; }
+.modal-overlay { 
+    background: rgba(0,0,0,0.95); 
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 .modal { 
     border: 2px solid var(--primary); 
     box-shadow: 0 0 50px var(--primary-glow); 
