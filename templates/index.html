@@ -13,6 +13,18 @@
     <canvas id="matrix-canvas"></canvas>
 
     <div class="app-container">
+        <!-- Mobile Navigation Header -->
+        <header class="mobile-header">
+            <div class="mobile-logo">
+                <h1>CYBER<span>FLASH</span></h1>
+            </div>
+            <button id="menu-toggle" class="hamburger">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </button>
+        </header>
+
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <div class="logo">
@@ -84,7 +96,7 @@
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div class="responsive-grid">
                     <div class="section-box" style="display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
                         <h3 class="section-title" style="align-self: flex-start; margin-bottom: 1rem;">PULSE_GAUGE // NET_SPEED</h3>
                         
@@ -128,7 +140,7 @@
                     <h2>DIAG_SUITE // ENGAGED</h2>
                 </header>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div class="responsive-grid">
                     <div>
                         <div class="section-box">
                             <h3 class="section-title">ICMP_INTERROGATE (PING)</h3>
@@ -225,7 +237,7 @@
                     <h2>GHOST_SHARE // ENCRYPTED_VAULT</h2>
                 </header>
 
-                <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem;">
+                <div class="vault-grid">
                     <div>
                         <div class="section-box" id="drop-zone">
                             <h3 class="section-title">TRANSMIT_OBJECT</h3>
@@ -311,7 +323,7 @@
 
                 <div class="section-box" style="max-width: 600px;">
                     <h3 class="section-title">VISUAL_OVERRIDE (THEMES)</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="responsive-grid" style="gap: 1rem;">
                         <button class="theme-btn active" data-theme="matrix" style="border-color: #00ff41; color: #00ff41;">MATRIX_CORE</button>
                         <button class="theme-btn" data-theme="cyberpunk" style="border-color: #ff00ff; color: #ff00ff;">CYBER_PINK</button>
                         <button class="theme-btn" data-theme="deep-sea" style="border-color: #00d4ff; color: #00d4ff;">DEEP_SEA</button>

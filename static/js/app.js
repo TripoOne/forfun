@@ -39,6 +39,18 @@ document.addEventListener('DOMContentLoaded', () => {
         logSystem("Awaiting identity authorization...");
     }
     
+    // Mobile Menu Toggle
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    
+    if (menuToggle) {
+        menuToggle.addEventListener('click', () => {
+            menuToggle.classList.toggle('active');
+            sidebar.classList.toggle('active');
+            logSystem(sidebar.classList.contains('active') ? "Mobile uplink opened." : "Mobile uplink closed.");
+        });
+    }
+
     // Tab switching
     tabs.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -51,6 +63,12 @@ document.addEventListener('DOMContentLoaded', () => {
             tabEl.classList.add('active');
             
             logSystem(`Navigating to module: ${tabId.toUpperCase()}`);
+
+            // Close mobile menu on navigate
+            if (sidebar.classList.contains('active')) {
+                sidebar.classList.remove('active');
+                menuToggle.classList.remove('active');
+            }
 
             // Handle Special Module Animations
             if (tabId === 'topology' && networkGraph) {
@@ -163,15 +181,20 @@ function initMatrix() {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    const chars = "0101010101010101ABCDEFHIJKLMNPQRSTUVXYZ$%&*#".split("");
+    let columns, drops;
     const fontSize = 14;
-    const columns = canvas.width / fontSize;
-    const drops = [];
+    const chars = "0101010101010101ABCDEFHIJKLMNPQRSTUVXYZ$%&*#".split("");
 
-    for (let x = 0; x < columns; x++) drops[x] = 1;
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        columns = canvas.width / fontSize;
+        drops = [];
+        for (let x = 0; x < columns; x++) drops[x] = 1;
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
     function draw() {
         ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
