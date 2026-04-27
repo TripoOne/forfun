@@ -51,6 +51,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Console Minimize Toggle
+    const consoleEl = document.getElementById('system-console');
+    const minimizeBtn = document.getElementById('minimize-console');
+    
+    if (minimizeBtn) {
+        minimizeBtn.addEventListener('click', () => {
+            consoleEl.classList.toggle('minimized');
+            minimizeBtn.textContent = consoleEl.classList.contains('minimized') ? "+" : "_";
+            logSystem(consoleEl.classList.contains('minimized') ? "Console stream throttled." : "Console stream expanded.");
+        });
+    }
+
     // Tab switching
     tabs.forEach(btn => {
         btn.addEventListener('click', () => {

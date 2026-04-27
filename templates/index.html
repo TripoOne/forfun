@@ -336,7 +336,10 @@
 
     <!-- Live System Console -->
     <div id="system-console">
-        <div style="border-bottom: 1px solid var(--border); margin-bottom: 5px; font-weight: bold; color: var(--secondary);">SYS_LOG_TERMINAL</div>
+        <div class="console-header">
+            <span>SYS_LOG_TERMINAL</span>
+            <button id="minimize-console" style="background:transparent; border:none; color:var(--secondary); cursor:pointer; font-weight:bold; padding:0 5px;">_</button>
+        </div>
         <div id="console-output">
             [SYS] BOOT_PROTOCOL initiated...<br>
             [SYS] Web interface running at 0.0.0.0:5000<br>
