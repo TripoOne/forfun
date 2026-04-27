@@ -51,15 +51,96 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Console Minimize Toggle
+    // Console Minimize & Drag Logic
     const consoleEl = document.getElementById('system-console');
     const minimizeBtn = document.getElementById('minimize-console');
+    const consoleHeader = document.querySelector('.console-header');
     
     if (minimizeBtn) {
-        minimizeBtn.addEventListener('click', () => {
+        minimizeBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent drag interference
             consoleEl.classList.toggle('minimized');
             minimizeBtn.textContent = consoleEl.classList.contains('minimized') ? "+" : "_";
             logSystem(consoleEl.classList.contains('minimized') ? "Console stream throttled." : "Console stream expanded.");
+        });
+    }
+
+    if (consoleHeader && consoleEl) {
+        let isDragging = false;
+        let offsetX, offsetY;
+
+        consoleHeader.addEventListener('mousedown', (e) => {
+            if (e.target === minimizeBtn) return;
+            isDragging = true;
+            
+            const rect = consoleEl.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+
+            // Transition from bottom/right positioning to top/left for smooth dragging
+            consoleEl.style.bottom = 'auto';
+            consoleEl.style.right = 'auto';
+            consoleEl.style.left = rect.left + 'px';
+            consoleEl.style.top = rect.top + 'px';
+            consoleEl.style.margin = '0'; 
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            let newX = e.clientX - offsetX;
+            let newY = e.clientY - offsetY;
+            
+            const maxX = window.innerWidth - consoleEl.offsetWidth;
+            const maxY = window.innerHeight - consoleEl.offsetHeight;
+            
+            newX = Math.max(0, Math.min(newX, maxX));
+            newY = Math.max(0, Math.min(newY, maxY));
+
+            consoleEl.style.left = newX + 'px';
+            consoleEl.style.top = newY + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+        
+        // Touch support for mobile dragging
+        consoleHeader.addEventListener('touchstart', (e) => {
+            if (e.target === minimizeBtn) return;
+            isDragging = true;
+            
+            const touch = e.touches[0];
+            const rect = consoleEl.getBoundingClientRect();
+            offsetX = touch.clientX - rect.left;
+            offsetY = touch.clientY - rect.top;
+
+            consoleEl.style.bottom = 'auto';
+            consoleEl.style.right = 'auto';
+            consoleEl.style.left = rect.left + 'px';
+            consoleEl.style.top = rect.top + 'px';
+            consoleEl.style.margin = '0';
+        }, { passive: true });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            
+            const touch = e.touches[0];
+            let newX = touch.clientX - offsetX;
+            let newY = touch.clientY - offsetY;
+            
+            const maxX = window.innerWidth - consoleEl.offsetWidth;
+            const maxY = window.innerHeight - consoleEl.offsetHeight;
+            
+            newX = Math.max(0, Math.min(newX, maxX));
+            newY = Math.max(0, Math.min(newY, maxY));
+
+            consoleEl.style.left = newX + 'px';
+            consoleEl.style.top = newY + 'px';
+        }, { passive: true });
+
+        document.addEventListener('touchend', () => {
+            isDragging = false;
         });
     }
 

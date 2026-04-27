@@ -487,6 +487,8 @@ button:hover {
     padding-bottom: 5px;
     font-weight: bold;
     color: var(--secondary);
+    cursor: move;
+    user-select: none;
 }
 
 #system-console.minimized {
