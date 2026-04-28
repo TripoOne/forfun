@@ -925,7 +925,11 @@ class NetworkGraph {
         document.getElementById('refresh-topology').disabled = true;
         
         try {
-            const res = await fetch('/api/network/lan-scan');
+            const res = await fetch('/api/network/scan-lan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            });
             const data = await res.json();
             this.buildGraph(data.active_hosts);
             logSystem(`VOID_GRAPH: ${data.active_hosts.length} active nodes projected.`);
