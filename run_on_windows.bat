@@ -32,20 +32,21 @@ set "UV_PYTHON_INSTALL_DIR=%BASE_DIR%.python"
 set "UV_CACHE_DIR=%BASE_DIR%.uv_cache"
 set "UV_PROJECT_ENVIRONMENT=%BASE_DIR%.venv"
 set "UV_PYTHON_PREFERENCE=only-managed"
+:: Disable symlinks/hardlinks for FAT32 compatibility
+set "UV_PYTHON_INSTALL_MIRROR_LINKS=0"
 
 :: 4. CHECK FOR LOCAL UV BINARY
 if not exist "uv.exe" (
     echo [!] ERROR: uv.exe not found on flash drive root.
-    pause
-    exit /b
+    goto error
 )
 
 echo :: ENSURING PORTABLE PYTHON IS READY...
-.\uv.exe python install 3.12
+.\uv.exe python install 3.12.3
 if !errorlevel! neq 0 (
     echo [!] ERROR: Failed to setup portable Python.
-    pause
-    exit /b
+    echo [!] If you see 'os error 1', your drive is likely FAT32.
+    echo [!] This is expected; the app will attempt to run using the installed core.
 )
 
 echo :: SYNCING MODULES (Storing on USB)...
@@ -60,8 +61,14 @@ echo :: LAUNCHING INTERFACE...
 
 if !errorlevel! neq 0 (
     echo [!] ERROR: Application crashed.
-    pause
+    goto error
 )
 
 echo :: SESSION FINISHED.
 pause
+exit /b 0
+
+:error
+echo [!] CRITICAL ERROR DETECTED.
+pause
+exit /b 1
